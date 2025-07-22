@@ -1197,44 +1197,50 @@ local GetCash = function()
 end
 
 
-local SendLog = function(D)
+local function SendLog(D)
     local Link = getgenv().AutofarmSettings.Webhook.Webhook
+    if Link == "" then return end
 
-    if (Link ~= "") then 
+    local Data = {
+        ["content"] = "",
+        ["embeds"] = {{
+            ["title"] = "**LDHC FARM**",
+            ["description"] = "Log from autofarm\n" ..
+             "### Username/UserID:\n" .. D[1] .. " / " .. tostring(D[2]) ..
+             "\n### Before FARM:\n```" .. D[6] .. "```" ..  -- สมมติว่าตัวแปร D[6] คือเงินก่อน FARM
+             "\n### Log:\n```[Wallet] = " .. D[3] .. 
+             "\n[Profit] = " .. D[4] .. 
+             "\n[Passed] = " .. D[5] .. "```",
+        }}
+    }
 
-        local Data = {
-            ["content"] = "",
-            ["embeds"] = {
-                {
-                    ["title"] = "**LDHC ATM FARM**:",
-                    ["description"] = "This is a log from the autofarm\n### Username/UserID:\n" .. D[1] .. " / " .. tostring(D[2]) .. "\n### Log:\n```[Wallet] = " .. D[3] .. "\n[Profit] = " .. D[4] .. "\n[Passed] = " .. D[5] .. "```",
-                    ["color"] = tonumber(0x00bbff),
-                }
-            }
-        }
-
-        local success, errorMessage = pcall(function()
-            local http_request = http_request or syn and syn.request
-            http_request({
-                Url = Link,
-                Body = game:GetService("HttpService"):JSONEncode(Data),
-                Method = "POST",
-                Headers = {["content-type"] = "application/json"}
-            })
-        end)
-
-        if not success then 
-            warn("Error while sending log: " .. tostring(errorMessage))
+    task.spawn(function()
+        local http_request = http_request or request or (syn and syn.request)
+        if http_request then
+            pcall(function()
+                http_request({
+                    Url = Link,
+                    Method = "POST",
+                    Headers = {["Content-Type"] = "application/json"},
+                    Body = game:GetService("HttpService"):JSONEncode(Data)
+                })
+            end)
+        else
+            warn("[Webhook] ❌ ไม่รองรับ http_request ใน Ronix หรือ executor นี้")
         end
-    end
+    end)
 end
 
 task.spawn(function()
-	while task.wait(getgenv().AutofarmSettings.Webhook.LogInterval * 60) do
-        local s, e = pcall(function()
-            SendLog({LocalPlayer.Name, LocalPlayer.UserId, G2L["16"].Text, G2L["12"].Text, G2L["e"].Text})
-        end)
-	end
+    while task.wait(getgenv().AutofarmSettings.Webhook.LogInterval * 60) do
+        SendLog({
+            LocalPlayer.Name,
+            LocalPlayer.UserId,
+            G2L["16"].Text,
+            G2L["12"].Text,
+            G2L["e"].Text
+        })
+    end
 end)
 
 local GetCash = function()
