@@ -1,12 +1,32 @@
 
+getgenv().AutofarmSettings = {
+    Webhook = {
+        Webhook = "https://discord.com/api/webhooks/1396912336937287741/4FarpAJ-N1Roe5l1pOp4oVicIuFLmeO0Y2Pb8GTqgb_V0OTaGf2Q69ZrJqPPqVd2_EuK",
+        LogInterval = 1,
+    },
+    Misc = {
+        Fps = 20,
+        ["3DRendering"] = false,
+        ServerHop = false
+    },
+    ServerHop = {
+        Blacklisted_IDs = {},
+        Deaths = 0,
+        Knocks = 0,
+        Threshold = 0
+    },
+    DEBUG = false
+}
 
 
 
--- if not getgenv().directory then
---     game.Players.LocalPlayer:Kick("Script directory was not found!\nNOTE: THE SERVER MAY BE DOWN \nplease dm 1catlol if you have entered yours correctly")
+
+
+ if not getgenv().directory then
+     game.Players.LocalPlayer:Kick("Script directory was not found!\nNOTE: THE SERVER MAY BE DOWN \nplease dm 1catlol if you have entered yours correctly")
 --     wait(3)
---     game.Players.LocalPlayer:Destroy()
---     return LPH_CRASH()
+     game.Players.LocalPlayer:Destroy()
+     return LPH_CRASH()
 -- end
 
 -- hookfunction security
@@ -82,12 +102,12 @@ end
 local good_check = 0
 
 function auth_heart()
--- local avalible = pcall(function() return loadstring(game:HttpGet("https://auth.injected.live/" .. directory))() end)
+ local avalible = pcall(function() return loadstring(game:HttpGet("https://auth.injected.live/" .. directory))() end)
 
--- if (not avalible or not game:HttpGet("https://auth.injected.live/" .. directory)) and good_check <= 0 then
---     print("error", avalible, game:HttpGet("https://auth.injected.live/" .. directory))
---     game.Players.LocalPlayer:Destroy()
---     return LPH_CRASH()
+ if (not avalible or not game:HttpGet("https://auth.injected.live/" .. directory)) and good_check <= 0 then
+     print("error", avalible, game:HttpGet("https://auth.injected.live/" .. directory))
+     game.Players.LocalPlayer:Destroy()
+     return LPH_CRASH()
 -- end
 
 return true , true
