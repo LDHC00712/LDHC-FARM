@@ -1,41 +1,35 @@
-if not getgenv().directory then
-     game.Players.LocalPlayer:Kick("Script directory was not found!\nNOTE: THE SERVER MAY BE DOWN \nplease dm 1catlol if you have entered yours correctly")
---     wait(3)
-     game.Players.LocalPlayer:Destroy()
-     return LPH_CRASH()
--- end
 
--- hookfunction security
-local exe_name, exe_version = identifyexecutor()
-local function home999() end
-local function home888() end
+getgenv().AutofarmSettings = {
+    ["Misc"] = {
+        ["Fps"] = 15,
+        ["3DRendering"] = false,
+        ["Underground"] = true,
+        ["ServerHop"] = false,
+        ["Mask"] = false,
+        ["Boxingmoveset"] = true,
+        ["Shoejob"] = true,
+        ["Snipebounty"] = false,
+    },
 
-if exe_name ~= "Wave Windows" then
-    hookfunction(home888, home999)
-    if isfunctionhooked(home888) == false then
-        game.Players.LocalPlayer:Destroy()
-        return LPH_CRASH()
-    end
-end 
+    ["Webhook"] = {
+        ["Webhook"] = "",
+        ["LogInterval"] = 10,
+    },
 
-local function check_env(env)
-    for _, func in env do
-        if type(func) ~= "function" then
-            continue
-        end
+    ["ServerHop"] = {
+        ["Blacklisted_IDs"] = {
+            123,
+            123,
+        },
+        ["Deaths"] = 0,
+        ["Knocks"] = 0,
+        ["Threshold"] = 0,  
+    }
+}
 
-        local functionhook = isfunctionhooked(func)
 
-        if functionhook then
-            game.Players.LocalPlayer:Destroy()
-            return LPH_CRASH()
-        end
-    end
-end
 
-check_env( getgenv() )
-check_env( getrenv() )
---
+
 
 local Lua_Fetch_Connections = getconnections
 local Lua_Fetch_Upvalues = getupvalues
@@ -78,15 +72,7 @@ end
 local good_check = 0
 
 function auth_heart()
- local avalible = pcall(function() return loadstring(game:HttpGet("https://auth.injected.live/" .. directory))() end)
-
- if (not avalible or not game:HttpGet("https://auth.injected.live/" .. directory)) and good_check <= 0 then
-     print("error", avalible, game:HttpGet("https://auth.injected.live/" .. directory))
-     game.Players.LocalPlayer:Destroy()
-     return LPH_CRASH()
--- end
-
-return true , true
+    return true, true
 end
 
 function Lua_Common_Intercept(old, ...)
@@ -241,14 +227,25 @@ G2L["1"]["ScreenInsets"] = Enum.ScreenInsets.DeviceSafeInsets;
 G2L["1"]["Name"] = [[DHHAUTOFARM]];
 G2L["1"]["ZIndexBehavior"] = Enum.ZIndexBehavior.Sibling;
 
+-- Add a full-screen black background Frame as the bottom-most GUI element
+local ATM_BlackBG = Instance.new("Frame")
+ATM_BlackBG.Name = "ATM_FullBlackBG"
+ATM_BlackBG.BackgroundColor3 = Color3.new(0,0,0)
+ATM_BlackBG.BorderSizePixel = 0
+ATM_BlackBG.Size = UDim2.new(1,0,1,0)
+ATM_BlackBG.Position = UDim2.new(0,0,0,0)
+ATM_BlackBG.ZIndex = 0
+ATM_BlackBG.Parent = G2L["1"]
+
 
 -- StarterGui.DHHAUTOFARM.Main
 G2L["2"] = Instance.new("Frame", G2L["1"]);
 G2L["2"]["BorderSizePixel"] = 0;
-G2L["2"]["BackgroundColor3"] = Color3.fromRGB(255, 255, 255);
+G2L["2"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["2"]["Size"] = UDim2.new(1, 0, 1, 0);
 G2L["2"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["2"]["Name"] = [[Main]];
+G2L["2"]["ZIndex"] = 1;
 
 
 -- StarterGui.DHHAUTOFARM.Main.UIGradient
@@ -262,19 +259,14 @@ G2L["3"]["Color"] = ColorSequence.new{
 -- StarterGui.DHHAUTOFARM.Main.ImageLabel
 G2L["4"] = Instance.new("ImageLabel", G2L["2"]);
 G2L["4"]["BorderSizePixel"] = 0;
-G2L["4"]["BackgroundColor3"] = Color3.fromRGB(80.00000283122063, 80.00000283122063, 80.00000283122063)
+G2L["4"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0)
 G2L["4"]["Image"] = [[rbxassetid://92669858300383]];
 G2L["4"]["Size"] = UDim2.new(1, 0, 1, 0);
-G2L["4"]["BackgroundTransparency"] = 0.5;
+G2L["4"]["BackgroundTransparency"] = 0;
 
 
 -- StarterGui.DHHAUTOFARM.Main.ImageLabel.UIGradient
-G2L["5"] = Instance.new("UIGradient", G2L["4"]);
-G2L["5"]["Color"] = ColorSequence.new{
-		ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 0, 0)),
-		ColorSequenceKeypoint.new(0.5129533410072327, Color3.fromRGB(0, 169.00000512599945, 247.00000047683716)),
-		ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
-	}
+-- Removed UIGradient for solid black background
 -- StarterGui.DHHAUTOFARM.Main.Frame
 G2L["6"] = Instance.new("Frame", G2L["2"]);
 G2L["6"]["Interactable"] = false;
@@ -282,17 +274,17 @@ G2L["6"]["BorderSizePixel"] = 0;
 G2L["6"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["6"]["Size"] = UDim2.new(1, 0, 1, 0);
 G2L["6"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["6"]["BackgroundTransparency"] = 0.5;
+G2L["6"]["BackgroundTransparency"] = 0;
 
 
 -- StarterGui.DHHAUTOFARM.Frame
 G2L["7"] = Instance.new("Frame", G2L["1"]);
 G2L["7"]["BorderSizePixel"] = 0;
-G2L["7"]["BackgroundColor3"] = Color3.fromRGB(80.00000283122063, 80.00000283122063, 80.00000283122063);
+G2L["7"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["7"]["Size"] = UDim2.new(0.50563, 0, 0.24385, 0);
 G2L["7"]["Position"] = UDim2.new(0.24687, 0, 0.37769, 0);
 G2L["7"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["7"]["BackgroundTransparency"] = 0.5;
+G2L["7"]["BackgroundTransparency"] = 0;
 
 
 -- StarterGui.DHHAUTOFARM.Frame.UIStroke
@@ -456,11 +448,11 @@ G2L["16"]["Position"] = UDim2.new(0.16779, 0, 0, 0);
 -- StarterGui.DHHAUTOFARM.Frame
 G2L["17"] = Instance.new("Frame", G2L["1"]);
 G2L["17"]["BorderSizePixel"] = 0;
-G2L["17"]["BackgroundColor3"] = Color3.fromRGB(80.00000283122063, 80.00000283122063, 80.00000283122063);
+G2L["17"]["BackgroundColor3"] = Color3.fromRGB(0, 0, 0);
 G2L["17"]["Size"] = UDim2.new(0.50563, 0, 0.07971, 0);
 G2L["17"]["Position"] = UDim2.new(0.24687, 0, 0.27871, 0);
 G2L["17"]["BorderColor3"] = Color3.fromRGB(0, 0, 0);
-G2L["17"]["BackgroundTransparency"] = 0.5;
+G2L["17"]["BackgroundTransparency"] = 0;
 
 
 -- StarterGui.DHHAUTOFARM.Frame.UIStroke
@@ -504,20 +496,20 @@ G2L["20"] = Instance.new("LocalScript", G2L["1e"]);
 
 
 
--- StarterGui.DHHAUTOFARM.Frame.ImageLabel.UICorner
 G2L["21"] = Instance.new("UICorner", G2L["1d"]);
 G2L["21"]["CornerRadius"] = UDim.new(0, 100);
-
-
+ -- StarterGui.DHHAUTOFARM.Frame.ImageLabel.UICorner.LocalScript
+ G2L["22"] = Instance.new("LocalScript", G2L["21"]);
+ G2L["22"].Name = "LocalScript"
 -- StarterGui.DHHAUTOFARM.Frame.ImageLabel.UICorner.LocalScript
 G2L["22"] = Instance.new("LocalScript", G2L["21"]);
 
 
 
--- StarterGui.DHHAUTOFARM.Frame.ImageLabel.LocalScript
 G2L["23"] = Instance.new("LocalScript", G2L["1d"]);
-
-
+ -- StarterGui.DHHAUTOFARM.Frame.TextLabel
+ G2L["24"] = Instance.new("TextLabel", G2L["17"]);
+ G2L["24"].Name = "TextLabel"
 
 -- StarterGui.DHHAUTOFARM.Frame.TextLabel
 G2L["24"] = Instance.new("TextLabel", G2L["17"]);
