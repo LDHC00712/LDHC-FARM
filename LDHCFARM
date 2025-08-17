@@ -1,28 +1,4 @@
-
-getgenv().AutofarmSettings = {
-    Webhook = {
-        Webhook = "https://discord.com/api/webhooks/1396912336937287741/4FarpAJ-N1Roe5l1pOp4oVicIuFLmeO0Y2Pb8GTqgb_V0OTaGf2Q69ZrJqPPqVd2_EuK",
-        LogInterval = 1,
-    },
-    Misc = {
-        Fps = 20,
-        ["3DRendering"] = false,
-        ServerHop = false
-    },
-    ServerHop = {
-        Blacklisted_IDs = {},
-        Deaths = 0,
-        Knocks = 0,
-        Threshold = 0
-    },
-    DEBUG = false
-}
-
-
-
-
-
- if not getgenv().directory then
+if not getgenv().directory then
      game.Players.LocalPlayer:Kick("Script directory was not found!\nNOTE: THE SERVER MAY BE DOWN \nplease dm 1catlol if you have entered yours correctly")
 --     wait(3)
      game.Players.LocalPlayer:Destroy()
@@ -1701,8 +1677,9 @@ end
 
 local RunService = game:GetService("RunService")
 
+
+-- Optimized koPlayer: Use Heartbeat and debounce
 local function koPlayer(characterToKO)
-    -- Safety checks
     if not characterToKO 
         or not characterToKO:FindFirstChild("HumanoidRootPart") 
         or not characterToKO:FindFirstChild("BodyEffects") 
@@ -1712,12 +1689,11 @@ local function koPlayer(characterToKO)
         return
     end
 
-    -- Instant teleport before loop starts
     LocalPlayer.Character.HumanoidRootPart.CFrame = characterToKO.HumanoidRootPart.CFrame * CFrame.new(0, 0, -1)
 
-    -- Start tracking
+    local lastAttack = 0
     local conn
-    conn = RunService.RenderStepped:Connect(function()
+    conn = RunService.Heartbeat:Connect(function()
         if not characterToKO 
             or not characterToKO:FindFirstChild("HumanoidRootPart") 
             or not characterToKO:FindFirstChild("BodyEffects") 
@@ -1730,7 +1706,10 @@ local function koPlayer(characterToKO)
 
         if characterToKO.BodyEffects["K.O"].Value == false then
             LocalPlayer.Character.HumanoidRootPart.CFrame = characterToKO.HumanoidRootPart.CFrame * CFrame.new(0, 0, -1)
-            Attack()
+            if tick() - lastAttack > 0.15 then
+                Attack()
+                lastAttack = tick()
+            end
         else
             conn:Disconnect()
         end
@@ -1757,34 +1736,33 @@ end)
 local runATMGrind = false
 local atmTask = nil
 
+
 function StartATMGrind()
     if runATMGrind then return end -- Prevent multiple loops
     runATMGrind = true
     atmTask = task.spawn(function()
-        while true and task.wait(0.2) do 
+        local cachedCashier = nil
+        local lastCashierCheck = 0
+        while runATMGrind and task.wait(0.3) do -- Increased wait for less CPU
             if Player.Character then
                 local startTime = tick()
                 local bodyeffects = Player.Character:WaitForChild("BodyEffects")
-                
+
                 if bodyeffects:WaitForChild("Cuff").Value == true then
                     unjail(Player.Character)
                 end
 
-                
                 if getgenv().AutofarmSettings.Misc.Mask == true then
                     if not Player.Character:FindFirstChild("In-gameMask") then
                         mask(Player.Character)
                     end
                 end
 
-
                 if getgenv().AutofarmSettings.Misc.Boxingmoveset == true then
                     boxing_moveset(Player.Character)
                 else
                     normal_moveset(Player.Character)
                 end
-
-
 
                 if getgenv().AutofarmSettings.Misc.Snipebounty == true then
                     local playerName = Bounty_player()
@@ -1793,20 +1771,16 @@ function StartATMGrind()
                         if playerToStomp then
                             log("Bounty sniping: "..playerToStomp.Name)
                             pcall(function()
-                                --Knock out player
                                 koPlayer(playerToStomp.Character)
-                                
-                                -- if the player is knocked out, stomp them
                                 if playerToStomp.Character.BodyEffects["K.O"].Value == true then
                                     while playerToStomp.Character.BodyEffects["K.O"].Value == true do
                                         Player.Character.HumanoidRootPart.CFrame = CFrame.new(playerToStomp.Character.UpperTorso.Position + Vector3.new(0, 3, 0))
                                         game.ReplicatedStorage:WaitForChild("MainEvent"):FireServer("Stomp", false)
-                                        task.wait(0.25)
+                                        task.wait(0.3)
                                     end
                                 end
-
                             end)
-                            task.wait()
+                            task.wait(0.1)
                         end
                     end
                 end
@@ -1814,65 +1788,64 @@ function StartATMGrind()
                 local Root = Player.Character:WaitForChild("HumanoidRootPart")
                 log("Finding ATM")
 
-
                 if getgenv().AutofarmSettings.Misc.Shoejob == true then
-                    Cashier = GetCashier()
-                    if Cashier == nil then
+                    if tick() - lastCashierCheck > 1.5 or not cachedCashier then
+                        cachedCashier = GetCashier()
+                        lastCashierCheck = tick()
+                    end
+                    if cachedCashier == nil then
                         shoe_job(Player.Character)
                     end
                 else
-                    repeat 
+                    repeat
                         Player.Character.HumanoidRootPart.CFrame = CFrame.new(0, 500, 0)
-                        
-                        Cashier = GetCashier()
-                        task.wait(0.25)
-                    until Cashier ~= nil or bodyeffects:WaitForChild("Cuff").Value == true
+                        if tick() - lastCashierCheck > 1.5 or not cachedCashier then
+                            cachedCashier = GetCashier()
+                            lastCashierCheck = tick()
+                        end
+                        task.wait(0.3)
+                    until cachedCashier ~= nil or bodyeffects:WaitForChild("Cuff").Value == true
                 end
 
-                
                 repeat
-                    task.wait(0.25)
+                    task.wait(0.3)
                     local partCount = 0
-                    for _, part in pairs(Cashier:GetDescendants()) do
+                    for _, part in pairs(cachedCashier:GetDescendants()) do
                         if part:IsA("BasePart") then
                             partCount = partCount + 1
                         end
                     end
                     if getgenv().AutofarmSettings.Misc.Underground == true then
                         if partCount == 10 then
-                            Root.CFrame = Cashier.Head.CFrame * CFrame.new(0, -4.5, 1.3)
+                            Root.CFrame = cachedCashier.Head.CFrame * CFrame.new(0, -4.5, 1.3)
                         else
-                            Root.CFrame = Cashier.Head.CFrame * CFrame.new(0, -7, 1.3)
+                            Root.CFrame = cachedCashier.Head.CFrame * CFrame.new(0, -7, 1.3)
                         end
                     else
-                        Root.CFrame = Cashier.Head.CFrame * CFrame.new(0, -1.5, 3)
+                        Root.CFrame = cachedCashier.Head.CFrame * CFrame.new(0, -1.5, 3)
                     end
                     createPlatform(Root.Position)
-                    
-                    task.wait(0.25)
                     log("Breaking ATM")
                     Attack()
-                until Cashier.Humanoid.Health <= 0 or bodyeffects:WaitForChild("Cuff").Value == true or tick() - startTime > 8
+                until cachedCashier.Humanoid.Health <= 0 or bodyeffects:WaitForChild("Cuff").Value == true or tick() - startTime > 8
                 startTime = tick()
-                repeat 
-                    for i, v in pairs(workspace.Ignored.Drop:GetChildren()) do 
+                repeat
+                    for i, v in pairs(workspace.Ignored.Drop:GetChildren()) do
                         if v.Name == "MoneyDrop" then
                             local clickDetector = v:FindFirstChild("ClickDetector")
-                            if clickDetector and clickDetector:IsA("ClickDetector") and (GetMag(v) < 17) then 
+                            if clickDetector and clickDetector:IsA("ClickDetector") and (GetMag(v) < 17) then
                                 log("Picking Cash")
                                 local success, err = pcall(function()
                                     fireclickdetector(clickDetector)
                                 end)
-
-                                task.wait(0.25)
+                                task.wait(0.3)
                             end
                         end
                     end
-                    task.wait(0.25)
+                    task.wait(0.3)
                 until GetCash() <= 0 or bodyeffects:WaitForChild("Cuff").Value == true or tick() - startTime > 8
 
-
-                Cashier = nil
+                cachedCashier = nil
             end
         end
     end)
